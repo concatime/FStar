@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 find "$@" -maxdepth 1 -name "*.ml" -print \
     | xargs -n 1 basename \

@@ -44,18 +44,18 @@ GENERATED_FILES=parse.mly FStar_Parser_Parse.ml FStar_Version.ml intfiles
 PREFIX=$(shell pwd)/fstar
 # The string "Madoko" if madoko is installed, something else otherwise.
 MADOKO = $(shell madoko --version 2>/dev/null | cut -c -6)
-DOS2UNIX=$(shell which dos2unix >/dev/null 2>&1 && echo dos2unix || echo true)
+DOS2UNIX=$(shell command -v dos2unix >/dev/null 2>&1 && echo dos2unix || echo true)
 # Set PACKAGE_DOCS to 1 if you want to include html docs into the binary package.
 # If so, then Madoko MUST be installed on the machine building the package.
 PACKAGE_DOCS?=0
 
 # Detect the GNU utilities
 INSTALL_EXEC := $(shell ginstall --version 2>/dev/null | cut -c -8 | head -n 1)
-FIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
+FIND=$(shell command -v gfind >/dev/null 2>&1 && echo gfind || echo find)
 ifdef INSTALL_EXEC
-   INSTALL_EXEC := ginstall
+   INSTALL_EXEC := ginstall -D
 else
-   INSTALL_EXEC := install
+   INSTALL_EXEC := install -D
 endif
 
 # Final sanity check for the OCaml version
@@ -109,7 +109,7 @@ endif
 	                    -e '/%type/s/[a-zA-Z0-9_]*\.//g' \
 	                    -e '/%token.*->.*/d' \
 	                    -e '/%type.*->.*/d' \
-	                  | cat -s >> $@
+	                  | cat >> $@
 
 # https://stackoverflow.com/questions/38294095/ocaml-how-to-solve-findlib-warnings-of-multiple-cmis
 FSTAR_MAIN_NATIVE=_build/src/fstar/ml/main.native
@@ -210,10 +210,10 @@ FStar_Version.ml:
 # permissions and creating directories on the fly as needed.
 # (JP: the package version of this command is based on git but for OPAM
 #  installs we cannot assume the user has git installed.)
-install_dir = cd ../../$(1) && find . -type f -exec $(INSTALL_EXEC) -m 644 -D {} $(PREFIX)/$(2)/{} \;
+install_dir = cd ../../$(1) && find . -type f -exec $(INSTALL_EXEC) -m 644 {} $(PREFIX)/$(2)/{} \;
 
 # install the standard library binary files
-install_fstarlib = $(INSTALL_EXEC) -m 755 -D ../../$(1)/$(2) $(PREFIX)/lib/fstar/$(2)
+install_fstarlib = $(INSTALL_EXEC) -m 755 ../../$(1)/$(2) $(PREFIX)/lib/fstar/$(2)
 
 # Install FStar into $(PREFIX) using the standard Unix directory
 # structure.  NOTE: this rule needs ocamlfind to install the fstarlib,
@@ -221,7 +221,7 @@ install_fstarlib = $(INSTALL_EXEC) -m 755 -D ../../$(1)/$(2) $(PREFIX)/lib/fstar
 # opam package, but it has not been tested in any other settings.
 install: all
 	@# Install the binary
-	$(INSTALL_EXEC) -m 755 -D $(FSTAR_MAIN_NATIVE) $(PREFIX)/bin/fstar.exe
+	$(INSTALL_EXEC) -m 755 $(FSTAR_MAIN_NATIVE) $(PREFIX)/bin/fstar.exe
 	@# Then the standard library
 	$(call install_dir,ulib,lib/fstar)
 	@# Then the binary library
@@ -295,7 +295,7 @@ endif
 	cp $(Z3_LICENSE) $(PREFIX)/LICENSE-z3.txt
 	@# Z3
 ifeq ($(OS),Windows_NT)
-	cp $(shell which libgmp-10.dll) $(PREFIX)/bin
+	cp $(shell command -v libgmp-10.dll) $(PREFIX)/bin
 	cp $(Z3_DIR)/*.exe $(Z3_DIR)/*.dll $(Z3_DIR)/*.lib $(PREFIX)/bin
 	chmod a+x $(PREFIX)/bin/z3.exe $(PREFIX)/bin/*.dll
 	zip -r -9 $(NAME).zip fstar

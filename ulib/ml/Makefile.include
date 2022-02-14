@@ -24,7 +24,7 @@ ifdef FSTAR_HOME
   ULIB_ML=$(FSTAR_HOME)/ulib/ml
   FSTARLIB_DIR=$(FSTAR_HOME)/bin/fstarlib
 else
-  FSTAR_PREFIX=$(dir $(shell which fstar.exe))/..
+  FSTAR_PREFIX=$(dir $(shell command -v fstar.exe))/..
   ULIB_ML=$(FSTAR_PREFIX)/lib/fstar/ml
   FSTARLIB_DIR=$(FSTAR_PREFIX)/lib/fstar-compiler-lib
 endif
